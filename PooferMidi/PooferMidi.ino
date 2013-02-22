@@ -8,6 +8,7 @@ USB  Usb;
 MIDI Midi(&Usb);
 byte midiOutBuf[ 3 ];
 boolean isPoofer;
+int currentPooferId;
 
 
 #define MIDI_RESERVED 7
@@ -59,6 +60,9 @@ void setup(void) {
 
 
   pooferSetup();
+  
+  poofersAllOff();
+
 
  // setupButtons();
 
@@ -102,30 +106,31 @@ void midiLoop() {
       for (int i = 0; i < NUMBUTTONS; i++) {
         if (midiButtons[i] == midiOutBuf[1]) {
           isPoofer = true;
+          currentPooferId = i;
           break;
         }   
       }
       
       
       Serial.print(midiOutBuf[1], DEC);
-       
       Serial.print(" note ");
+      
       if (128 == midiOutBuf[0]) { 
         
         Serial.println("off");
         if (isPoofer) {
-          pooferOn(i);
+          pooferOff(currentPooferId);
         }  
+        
       }
       
-       else if (144 == midiOutBuf[0]) { 
-         for (int i = 0; i < NUMBUTTONS; i++) {
-           if (midiButtons[i] == midiOutBuf[1]) {
-             Serial.print(" and poofer ");
-             pooferOn(i);
-           }  
-         }
+      else if (144 == midiOutBuf[0]) { 
+
          Serial.println("on");
+         if (isPoofer) {
+           pooferOn(currentPooferId);
+         }  
+
        }
        else { 
          Serial.println("unknown");
