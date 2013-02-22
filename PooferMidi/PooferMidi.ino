@@ -1,6 +1,18 @@
 #include "poofer.h"
 
 
+#include <Usb.h>
+#include <usbh_midi.h>
+
+USB  Usb;
+MIDI Midi(&Usb);
+byte midiOutBuf[ 3 ];
+boolean isPoofer;
+
+
+#define MIDI_RESERVED 7
+
+
 //  BigRedButton on pin 7 input
 //  BigRedButton LED on pin 8 output
 const int bigRedBtnPin = 10;     // the number of the pushbutton pin
@@ -11,13 +23,17 @@ int redLEDState = 0;
 
 #define PRESSED LOW
 
-
 #define DEBOUNCE 10  // button debouncer, how many ms to debounce, 5+ ms is usually plenty
 
 // here is where we define the buttons that we'll use. button "1" is the first, button "6" is the 6th, etc
-byte buttons[] = {11, 12, 14, 15, 16, 17, 18, 19, bigRedBtnPin}; // the analog 0-5 pins are also known as 14-19
+byte midiButtons[] = {
+  48, 50, 52, 53, 
+  55, 57, 59, 60
+}; 
+
+// the analog 0-5 pins are also known as 14-19
 // This handy macro lets us determine how big the array up above is, by checking the size
-#define NUMBUTTONS sizeof(buttons)
+#define NUMBUTTONS sizeof(midiButtons)
 // we will track if a button is just pressed, just released, or 'currently pressed' 
 volatile byte pressed[NUMBUTTONS], justpressed[NUMBUTTONS], justreleased[NUMBUTTONS];
 
@@ -25,7 +41,7 @@ volatile byte pressed[NUMBUTTONS], justpressed[NUMBUTTONS], justreleased[NUMBUTT
 
 
 void setup(void) {
- // Serial.begin(9600);
+  Serial.begin(9600);
  // Serial.println("8 Poofer test");
 
   // Big Red Button setup
@@ -44,14 +60,18 @@ void setup(void) {
 
   pooferSetup();
 
-  setupButtons();
+ // setupButtons();
 
+  setupMidi();
 }
 
 
 
 void loop(void) {
-  buttonLoop();
+
+  // buttonLoop();
+  
+  midiLoop();
   
  /* cycleAllPoofers();
   
@@ -70,7 +90,56 @@ void loop(void) {
 
 }
 
+void midiLoop() {
 
+  Usb.Task();
+  
+  if( Usb.getUsbTaskState() == USB_STATE_RUNNING ) {
+    if( Midi.RcvData(midiOutBuf) == true ){
+  
+      //check if midi note is assigned to poofer  
+      isPoofer = false; 
+      for (int i = 0; i < NUMBUTTONS; i++) {
+        if (midiButtons[i] == midiOutBuf[1]) {
+          isPoofer = true;
+          break;
+        }   
+      }
+      
+      
+      Serial.print(midiOutBuf[1], DEC);
+       
+      Serial.print(" note ");
+      if (128 == midiOutBuf[0]) { 
+        
+        Serial.println("off");
+        if (isPoofer) {
+          pooferOn(i);
+        }  
+      }
+      
+       else if (144 == midiOutBuf[0]) { 
+         for (int i = 0; i < NUMBUTTONS; i++) {
+           if (midiButtons[i] == midiOutBuf[1]) {
+             Serial.print(" and poofer ");
+             pooferOn(i);
+           }  
+         }
+         Serial.println("on");
+       }
+       else { 
+         Serial.println("unknown");
+       }
+       
+       
+   //   Serial.println(midiOutBuf[2], DEC); //velocity
+      
+    }  
+  }
+  delay(1);
+  return;
+}
+/*
 void buttonLoop() {
   for (byte i = 0; i < NUMBUTTONS; i++) {
     if (justpressed[i]) {
@@ -156,16 +225,7 @@ void check_switches()
   for (index = 0; index < NUMBUTTONS; index++) {
      
     currentstate[index] = digitalRead(buttons[index]);   // read the button
-    
-    /*     
-    Serial.print(index, DEC);
-    Serial.print(": cstate=");
-    Serial.print(currentstate[index], DEC);
-    Serial.print(", pstate=");
-    Serial.print(previousstate[index], DEC);
-    Serial.print(", press=");
-    */
-    
+  
     if (currentstate[index] == previousstate[index]) {
       if ((pressed[index] == LOW) && (currentstate[index] == LOW)) {
           // just pressed
@@ -181,5 +241,21 @@ void check_switches()
     previousstate[index] = currentstate[index];   // keep a running tally of the buttons
   }
 }
+*/
 
+void setupMidi(){
+ 
+   //Workaround for non UHS2.0 Shield 
+  pinMode(MIDI_RESERVED,OUTPUT);
+  digitalWrite(MIDI_RESERVED,HIGH);
+
+  if (Usb.Init() == -1) {
+    //while(1); //halt
+    
+  }//if (Usb.Init() == -1...
+  delay( 200 );
+
+
+  return; 
+}
 
