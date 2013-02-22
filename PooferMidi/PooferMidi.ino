@@ -1,8 +1,9 @@
 #include "poofer.h"
-
-
 #include <Usb.h>
 #include <usbh_midi.h>
+
+
+#define DEBUG true
 
 USB  Usb;
 MIDI Midi(&Usb);
@@ -42,7 +43,7 @@ volatile byte pressed[NUMBUTTONS], justpressed[NUMBUTTONS], justreleased[NUMBUTT
 
 
 void setup(void) {
-  Serial.begin(9600);
+ Serial.begin(9600);
  // Serial.println("8 Poofer test");
 
   // Big Red Button setup
@@ -59,14 +60,10 @@ void setup(void) {
   delay(500);
 
 
+  setupMidi();
+
   pooferSetup();
   
-  poofersAllOff();
-
-
- // setupButtons();
-
-  setupMidi();
 }
 
 

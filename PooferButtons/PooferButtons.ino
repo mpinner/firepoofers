@@ -15,7 +15,10 @@ int redLEDState = 0;
 #define DEBOUNCE 10  // button debouncer, how many ms to debounce, 5+ ms is usually plenty
 
 // here is where we define the buttons that we'll use. button "1" is the first, button "6" is the 6th, etc
-byte buttons[] = {11, 12, 14, 15, 16, 17, 18, 19, bigRedBtnPin}; // the analog 0-5 pins are also known as 14-19
+byte buttons[] = {6, 4, 12, 2, 8, 5, 11, 3, bigRedBtnPin}; // the analog 0-5 pins are also known as 14-19
+
+
+
 // This handy macro lets us determine how big the array up above is, by checking the size
 #define NUMBUTTONS sizeof(buttons)
 // we will track if a button is just pressed, just released, or 'currently pressed' 
@@ -25,8 +28,8 @@ volatile byte pressed[NUMBUTTONS], justpressed[NUMBUTTONS], justreleased[NUMBUTT
 
 
 void setup(void) {
- // Serial.begin(9600);
- // Serial.println("8 Poofer test");
+  Serial.begin(9600);
+ Serial.println("8 Poofer test");
 
   // Big Red Button setup
   pinMode(bigRedBtnPin, INPUT_PULLUP);      
@@ -75,7 +78,7 @@ void buttonLoop() {
   for (byte i = 0; i < NUMBUTTONS; i++) {
     if (justpressed[i]) {
       justpressed[i] = 0;
-      Serial.print(i, DEC);
+      Serial.print(i+1, DEC);
       Serial.println(" Just pressed"); 
       pooferOn(i);
       
@@ -88,7 +91,7 @@ void buttonLoop() {
     }
     if (justreleased[i]) {
       justreleased[i] = 0;
-      Serial.print(i, DEC);
+      Serial.print(i+1, DEC);
       Serial.println(" Just released");
       pooferOff(i);
             

@@ -81,13 +81,13 @@ void pooferOff(int id)
 void poofersAllOn()
 {
   for (int i=0;i<numPoofers;i++)
-    pooferOn(poofers[i]);
+    pooferOn(i);
 }
 
 void poofersAllOff()
 {
   for (int i=0;i<numPoofers;i++)
-    pooferOff(poofers[i]);
+    pooferOff(i);
 }
 
 void cycleAllPoofers()
@@ -95,9 +95,9 @@ void cycleAllPoofers()
   Serial.println("Begin Cycle All Poofers");
   
   for (int i=0;i<numPoofers;i++) {
-    pooferOn(poofers[i]);
+    pooferOn(i);
     delay(500);
-    pooferOff(poofers[i]);
+    pooferOff(i);
   }
   
   Serial.println("All Poofers on together, then off");

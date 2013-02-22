@@ -11,8 +11,10 @@
 #include "buttons.h"
 #include "midiButtons.h"
 
+#define DEBUG true
+
 void setup(void) {
-Serial.begin(9600);
+ if (DEBUG) Serial.begin(9600);
  // Serial.println("8 Poofer test");
 
   pooferSetup();
@@ -66,7 +68,7 @@ void setupMidi() {
 
   if (Usb.Init() == -1) {
     //while(1); //halt
-    Serial.println("MIDI USB Failed to Initialize");
+     if (DEBUG) Serial.println("MIDI USB Failed to Initialize");
     
   }//if (Usb.Init() == -1...
   delay( 200 );
@@ -93,8 +95,8 @@ void midiLoop()
       }
       
       
-      Serial.print(midiOutBuf[1], DEC);
-      Serial.print(" note ");
+      if (DEBUG) Serial.print(midiOutBuf[1], DEC);
+      if (DEBUG) Serial.print(" note ");
       
       if (128 == midiOutBuf[0]) { 
         
@@ -107,14 +109,14 @@ void midiLoop()
       
       else if (144 == midiOutBuf[0]) { 
 
-         Serial.println("on");
+         if (DEBUG) Serial.println("on");
          if (isPoofer) {
            pooferOn(currentPooferId);
          }  
 
        }
        else { 
-         Serial.println("unknown");
+         if (DEBUG) Serial.println("unknown");
        }
        
        
